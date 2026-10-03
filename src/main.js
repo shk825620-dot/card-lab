@@ -247,6 +247,11 @@ dom.exportBtn.addEventListener('click', async () => {
   dom.exportBtn.disabled = true;
   setStatus('正在导出，请稍候…', 'busy');
 
+  // 预览时卡片被祖先元素 transform 缩小了；导出前先把它还原成 1:1，
+  // 免得坐标系里残留缩放因子。只改 CSS 变量，不碰被 ResizeObserver 观测的节点。
+  const previousScale = dom.stageInner.style.getPropertyValue('--scale');
+  dom.stageInner.style.setProperty('--scale', '1');
+
   try {
     const blob = await exportCard(dom.card, { pixelRatio: state.pixelRatio });
     downloadBlob(blob, buildFileName(state.text, state.size));
@@ -258,6 +263,7 @@ dom.exportBtn.addEventListener('click', async () => {
   } catch (error) {
     setStatus(`导出失败：${error?.message ?? '未知错误'}`, 'error');
   } finally {
+    dom.stageInner.style.setProperty('--scale', previousScale || '1');
     dom.exportBtn.disabled = store.errors().length > 0;
   }
 });
