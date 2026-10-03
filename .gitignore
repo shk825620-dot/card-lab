@@ -1,0 +1,21 @@
+# 依赖与构建产物
+node_modules/
+dist/
+
+# npm 缓存（受限环境里必须放在项目内才能安装）
+.npm-cache-probe/
+
+# 本地环境文件
+*.local
+.env
+.env.*
+
+# 编辑器与系统
+.idea/
+.vscode/
+.DS_Store
+Thumbs.db
+
+# 日志
+*.log
+npm-debug.log*

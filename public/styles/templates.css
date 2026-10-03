@@ -1,0 +1,226 @@
+/*
+ * 四套卡片模板。
+ *
+ * 硬约束：全程禁用 backdrop-filter。
+ * 导出走的是 SVG <foreignObject> 光栅化，backdrop-filter 会直接丢失，
+ * 所以"玻璃"效果用半透明叠层 + 内高光近似，保证导出和预览一致。
+ */
+
+.card {
+  position: relative;
+  overflow: hidden;
+  display: flex;
+  flex-direction: column;
+  justify-content: space-between;
+  gap: 1.4rem;
+
+  padding: var(--cl-padding, 2.4rem);
+  border-radius: var(--cl-radius, 0.9rem);
+  background: var(--cl-bg, #222);
+  color: var(--cl-fg, #fff);
+  font-family: var(--cl-fontFamily, sans-serif);
+  box-shadow: var(--cl-shadow, none);
+
+  /* 导出时文字抗锯齿更接近浏览器渲染 */
+  text-rendering: geometricprecision;
+  -webkit-font-smoothing: antialiased;
+}
+
+.card__eyebrow {
+  display: block;
+  font-size: 0.62rem;
+  font-weight: 600;
+  letter-spacing: 0.34em;
+  text-transform: uppercase;
+  color: var(--cl-accent, currentColor);
+  opacity: 0.9;
+  margin-bottom: var(--cl-eyebrowGap, 1.6rem);
+}
+
+.card__title {
+  margin: 0;
+  font-weight: var(--cl-titleWeight, 700);
+  letter-spacing: var(--cl-titleTrack, 0);
+  color: var(--cl-fg, #fff);
+  white-space: pre-wrap;
+  overflow-wrap: anywhere;
+  word-break: break-word;
+}
+
+.card__subtext {
+  margin: var(--cl-subGap, 1.3rem) 0 0;
+  font-size: 0.72rem;
+  font-weight: var(--cl-subWeight, 400);
+  letter-spacing: var(--cl-subTrack, 0.04em);
+  color: var(--cl-muted, currentColor);
+  white-space: pre-wrap;
+  overflow-wrap: anywhere;
+}
+
+.card__rule {
+  display: block;
+  width: var(--cl-accentWidth, 3.2rem);
+  max-width: 100%;
+  height: var(--cl-accentHeight, 0.28rem);
+  border-radius: 999px;
+  background: var(--cl-accent, currentColor);
+}
+
+.card__footer {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 1rem;
+}
+
+.card__mark {
+  font-size: 0.55rem;
+  font-weight: 600;
+  letter-spacing: 0.28em;
+  text-transform: uppercase;
+  color: var(--cl-muted, currentColor);
+  opacity: 0.7;
+}
+
+/* ---------- 1. 玻璃拟态 ---------- */
+
+/* 用 ::before 叠一层高光渐变，而不是覆盖卡片的 background-image：
+   一来保留主题底色，二来伪元素在导出时会被内联成普通 div，兼容性最好。 */
+.card[data-template="glass"]::before {
+  content: "";
+  position: absolute;
+  inset: 0;
+  pointer-events: none;
+  background-image: linear-gradient(
+    150deg,
+    rgba(255, 255, 255, 0.16),
+    rgba(255, 255, 255, 0.02) 42%,
+    rgba(255, 255, 255, 0) 70%
+  );
+}
+
+.card[data-template="glass"] .card__surface {
+  position: absolute;
+  inset: 0;
+  background: var(--cl-surface, rgba(255, 255, 255, 0.06));
+  pointer-events: none;
+}
+
+.card[data-template="glass"] .card__grain {
+  position: absolute;
+  inset: 0;
+  pointer-events: none;
+  opacity: 0.55;
+  background-image:
+    radial-gradient(60rem 40rem at 12% 110%, rgba(255, 255, 255, 0.16), transparent 60%),
+    radial-gradient(40rem 30rem at 92% -10%, var(--cl-accentSoft, rgba(255, 255, 255, 0.12)), transparent 62%);
+}
+
+.card[data-template="glass"] .card__body {
+  position: relative;
+  z-index: 1;
+}
+
+/* ---------- 2. 霓虹赛博 ---------- */
+
+.card[data-template="neon"] .card__grain {
+  position: absolute;
+  inset: 0;
+  pointer-events: none;
+  opacity: 0.5;
+  background-image:
+    repeating-linear-gradient(
+      to bottom,
+      rgba(255, 255, 255, 0.05) 0,
+      rgba(255, 255, 255, 0.05) 0.03rem,
+      transparent 0.03rem,
+      transparent 0.24rem
+    ),
+    radial-gradient(38rem 26rem at 80% 8%, var(--cl-accentSoft, rgba(255, 255, 255, 0.1)), transparent 60%);
+}
+
+.card[data-template="neon"] .card__title {
+  text-shadow:
+    0 0 0.9rem var(--cl-accentSoft, rgba(255, 255, 255, 0.2)),
+    0 0.06rem 0 rgba(0, 0, 0, 0.6);
+}
+
+.card[data-template="neon"] .card__rule {
+  box-shadow: 0 0 1.1rem var(--cl-accentSoft, rgba(255, 255, 255, 0.2));
+}
+
+.card[data-template="neon"] .card__body {
+  position: relative;
+  z-index: 1;
+}
+
+/* ---------- 3. 日系极简 ---------- */
+
+.card[data-template="zen"] .card__title {
+  line-height: 1.45;
+}
+
+.card[data-template="zen"] .card__rule {
+  background: var(--cl-accent, #b08968);
+  opacity: 0.85;
+}
+
+.card[data-template="zen"] .card__grain {
+  position: absolute;
+  inset: 0;
+  pointer-events: none;
+  opacity: 0.6;
+  background-image: radial-gradient(46rem 30rem at 100% 100%, rgba(176, 137, 104, 0.16), transparent 62%);
+}
+
+/* ---------- 4. 杂志排版 ---------- */
+
+.card[data-template="magazine"] {
+  border: 0.06rem solid var(--cl-fg, #111);
+  justify-content: flex-start;
+}
+
+.card[data-template="magazine"] .card__rule {
+  width: 100%;
+  max-width: none;
+  height: 0.14rem;
+  border-radius: 0;
+  opacity: 1;
+}
+
+.card[data-template="magazine"] .card__title {
+  line-height: 1.16;
+  text-transform: none;
+}
+
+.card[data-template="magazine"] .card__subtext {
+  text-transform: uppercase;
+}
+
+.card[data-template="magazine"] .card__footer {
+  margin-top: auto;
+  border-top: 0.06rem solid var(--cl-fg, #111);
+  padding-top: 0.9rem;
+}
+
+/* ---------- 长文本自动降级 ---------- */
+
+/* 内容过长时由 render.js 加上 data-density，逐级收紧排版而不是直接溢出 */
+.card[data-density="compact"] {
+  gap: 1rem;
+  padding: calc(var(--cl-padding, 2.4rem) * 0.72);
+}
+
+.card[data-density="compact"] .card__eyebrow {
+  margin-bottom: calc(var(--cl-eyebrowGap, 1.6rem) * 0.6);
+}
+
+.card[data-density="tiny"] {
+  gap: 0.6rem;
+  padding: calc(var(--cl-padding, 2.4rem) * 0.5);
+}
+
+.card[data-density="tiny"] .card__eyebrow,
+.card[data-density="tiny"] .card__mark {
+  letter-spacing: 0.18em;
+}

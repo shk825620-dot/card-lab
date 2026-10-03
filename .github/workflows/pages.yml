@@ -1,0 +1,54 @@
+# 把仓库里的静态文件直接部署到 GitHub Pages。
+#
+# 这个项目没有构建步骤：源码就是可以直接在浏览器里跑的静态文件。
+# 之所以用 Actions 而不是"分支直发"，是为了每次推送都有一次明确的构建记录，
+# 出问题能在 Actions 页面看到是哪一次、哪一步失败。
+name: Deploy to GitHub Pages
+
+on:
+  push:
+    branches: [main]
+  workflow_dispatch:
+
+permissions:
+  contents: read
+  pages: write
+  id-token: write
+
+# 同时只跑一个部署，新的推送不会取消正在进行的部署
+concurrency:
+  group: pages
+  cancel-in-progress: false
+
+jobs:
+  deploy:
+    runs-on: ubuntu-latest
+    environment:
+      name: github-pages
+      url: ${{ steps.deployment.outputs.page_url }}
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v4
+
+      - name: Setup Node
+        uses: actions/setup-node@v4
+        with:
+          node-version: '22'
+
+      # 不安装任何依赖：这个项目用 Node 内置的 node:test，
+      # 所以"测试通过"这件事不依赖 npm 生态是否可用。
+      - name: Run unit tests
+        run: node tests/run-all.mjs
+
+      - name: Configure Pages
+        uses: actions/configure-pages@v5
+
+      - name: Upload site artifact
+        uses: actions/upload-pages-artifact@v3
+        with:
+          # 直接发布仓库根目录：index.html、src/、public/ 都会被带上
+          path: .
+
+      - name: Deploy to GitHub Pages
+        id: deployment
+        uses: actions/deploy-pages@v4

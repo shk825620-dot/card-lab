@@ -1,0 +1,71 @@
+/*
+ * 全局设计令牌。
+ *
+ * 卡片内部一律使用 rem 单位，并在卡片根节点上设置 font-size；
+ * 这样"字号滑杆"改变的是卡片的基准字号，留白、圆角、阴影会一起等比缩放。
+ * 因此 :root 的 font-size 必须固定为 16px，不能被浏览器设置影响。
+ */
+
+:root {
+  font-size: 16px;
+
+  /* 外壳色板 */
+  --app-bg: #0b0c11;
+  --app-bg-soft: #14161f;
+  --app-panel: rgba(255, 255, 255, 0.04);
+  --app-panel-strong: rgba(255, 255, 255, 0.08);
+  --app-border: rgba(255, 255, 255, 0.1);
+  --app-text: #eceef5;
+  --app-text-muted: rgba(236, 238, 245, 0.62);
+  --app-accent: #7c6cff;
+  --app-accent-soft: rgba(124, 108, 255, 0.16);
+  --app-danger: #ff6b6b;
+  --app-success: #3ddc97;
+
+  /* 间距阶梯 */
+  --space-1: 4px;
+  --space-2: 8px;
+  --space-3: 12px;
+  --space-4: 16px;
+  --space-5: 24px;
+  --space-6: 32px;
+  --space-7: 48px;
+
+  /* 圆角与阴影 */
+  --radius-sm: 8px;
+  --radius-md: 12px;
+  --radius-lg: 18px;
+  --shadow-panel: 0 18px 50px rgba(0, 0, 0, 0.45);
+
+  /* 最小可点击尺寸，保证手机上点得到 */
+  --touch-target: 44px;
+
+  --font-sans: "Noto Sans SC", "PingFang SC", "Microsoft YaHei", system-ui, -apple-system, sans-serif;
+  --font-mono: "JetBrains Mono", "Cascadia Mono", Consolas, monospace;
+
+  --motion-fast: 140ms;
+  --motion-base: 220ms;
+  --ease-out: cubic-bezier(0.22, 1, 0.36, 1);
+}
+
+* {
+  box-sizing: border-box;
+}
+
+html,
+body {
+  margin: 0;
+  padding: 0;
+  min-height: 100%;
+}
+
+body {
+  background:
+    radial-gradient(1200px 600px at 15% -10%, rgba(124, 108, 255, 0.22), transparent 60%),
+    radial-gradient(900px 500px at 100% 0%, rgba(0, 216, 255, 0.12), transparent 55%),
+    var(--app-bg);
+  color: var(--app-text);
+  font-family: var(--font-sans);
+  line-height: 1.5;
+  -webkit-font-smoothing: antialiased;
+}
