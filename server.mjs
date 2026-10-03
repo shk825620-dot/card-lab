@@ -3,9 +3,9 @@
  *
  * 存在的意义：这个项目不装任何依赖也应该能直接跑起来。
  *   1) 不依赖 vite（某些受限环境里 vite 的 Windows 分支会调 exec('net use') 而失败）；
- *   2) 静态规则和线上一致：根目录下的文件按原路径提供，public/ 里的内容映射到网站根，
- *      所以本地看到的路径和 GitHub Pages 上完全一样，不存在"本地对、线上 404"。
- *   3) 路径穿越会被拒绝，且不会把 node_modules 之类的目录暴露出去。
+ *   2) 静态映射和线上完全一致：**仓库根目录就是网站根目录**，
+ *      所以本地看到的路径和 GitHub Pages 上的一模一样，不会出现"本地对、线上 404"。
+ *   3) 路径穿越会被拒绝，且不会把 node_modules 和开发配置暴露出去。
  *
  * 用法：node server.mjs [端口]
  */
@@ -17,7 +17,6 @@ import path from 'node:path';
 
 const here = path.dirname(fileURLToPath(import.meta.url));
 const ROOT = path.resolve(here);
-const PUBLIC_DIR = path.join(ROOT, 'public');
 const PORT = Number.parseInt(process.argv[2] ?? process.env.PORT ?? '5178', 10);
 const HOST = '127.0.0.1';
 
@@ -36,6 +35,7 @@ const MIME = {
   '.ico': 'image/x-icon',
   '.woff2': 'font/woff2',
   '.txt': 'text/plain; charset=utf-8',
+  '.md': 'text/plain; charset=utf-8',
   '.map': 'application/json; charset=utf-8',
 };
 
@@ -49,7 +49,7 @@ function isInside(parent, child) {
 }
 
 /**
- * 把请求路径解析成磁盘上的绝对路径，并按生产环境的映射规则判断可见性。
+ * 把请求路径解析成磁盘上的绝对路径，并按线上同样的规则判断可见性。
  * 返回 null 表示这个路径不存在或不允许访问。
  */
 function resolveTarget(pathname) {
@@ -58,22 +58,16 @@ function resolveTarget(pathname) {
     return path.join(ROOT, 'index.html');
   }
 
-  // public/ 映射到网站根，优先匹配，和线上构建产物一致。
-  const fromPublic = path.resolve(PUBLIC_DIR, relative);
-  if (isInside(PUBLIC_DIR, fromPublic) && isFile(fromPublic)) {
-    return fromPublic;
-  }
+  const target = path.resolve(ROOT, relative);
+  if (!isInside(ROOT, target)) return null;
 
-  // 根目录只放行少量明确的文件，避免把 node_modules 和开发配置暴露出去。
-  // 线上 GitHub Pages 其实会连 docs/ 一起发布，这里保守一点不影响开发。
-  const fromRoot = path.resolve(ROOT, relative);
-  if (!isInside(ROOT, fromRoot)) return null;
-
+  // 线上 GitHub Pages 会把整个仓库都发布出去，这里保守一点：
+  // 只挡住本机开发用的东西，其余按原路径提供，规则和线上保持一致。
   const topSegment = relative.split(/[\\/]/)[0].toLowerCase();
   if (topSegment === 'node_modules' || topSegment.startsWith('.')) return null;
-  if (/\.(json|mjs|lock|md)$/i.test(relative)) return null;
+  if (/\.(json|mjs|lock)$/i.test(relative)) return null;
 
-  return isFile(fromRoot) ? fromRoot : null;
+  return isFile(target) ? target : null;
 }
 
 function isFile(target) {

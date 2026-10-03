@@ -1,5 +1,5 @@
 /**
- * 把 modern-screenshot 的 UMD 构建下载并锁定到 public/vendor/。
+ * 把 modern-screenshot 的 UMD 构建下载并锁定到 vendor/。
  *
  * 为什么不放进 package.json 依赖：
  *   1) 首次 clone 的人不装任何依赖也能直接跑起来；
@@ -19,7 +19,9 @@ const PINNED_VERSION = '4.7.0';
 const version = process.argv[2] ?? PINNED_VERSION;
 
 const here = path.dirname(fileURLToPath(import.meta.url));
-const outDir = path.join(here, '..', 'public', 'vendor');
+// 注意：仓库根目录就是网站根目录，所以 vendor/ 放在最外层，
+// 不能放进会被当成构建输入的目录里。
+const outDir = path.join(here, '..', 'vendor');
 const outFile = path.join(outDir, 'modern-screenshot.umd.js');
 
 /** 极简 tar 解析：够用来从 npm tarball 里取一个文件。 */

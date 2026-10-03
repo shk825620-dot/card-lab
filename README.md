@@ -11,10 +11,10 @@
   TODO(作者自己动手)：录一段 10~15 秒的 GIF 放在这里。
   录屏内容建议：打字 -> 切模板 -> 点导出 -> 图片保存下来。
   这一段是整份 README 最重要的一行，README 的转化率一半靠它。
-  录好后把文件放到 public/demo/demo.gif，然后把下面这行的注释去掉。
+  录好后把文件放到 demo/demo.gif，然后把下面这行的注释去掉。
 -->
 
-<!-- ![演示](public/demo/demo.gif) -->
+<!-- ![演示](demo/demo.gif) -->
 
 ## 它解决什么问题
 
@@ -44,24 +44,17 @@ node server.mjs
 
 想换个端口：`node server.mjs 8080`。
 
-<details>
-<summary>可选：用 Vite 起开发服务器</summary>
-
-```bash
-npm install
-npm run dev
-```
-
-Vite 只提供本地开发体验（模块热更新）。**线上部署不经过它**，所以你可以完全不装它。
-</details>
+服务器做的事只有一件：把仓库根目录当网站根目录提供出去——和 GitHub Pages 的规则完全一致，
+所以本地看到的路径和线上不会有任何差别。**没有构建步骤，改完文件刷新浏览器就能看到。**
 
 ## 跑测试
 
 ```bash
-node tests/run-all.mjs
+npm test
+# 等价于 node tests/run-all.mjs
 ```
 
-测试用 Node 内置的 `node:test`，同样**不需要安装任何依赖**。也可以单独跑：
+测试用 Node 内置的 `node:test`，同样**不需要安装任何依赖**。也可以只跑一个文件：
 
 ```bash
 node tests/theme.test.js
@@ -72,9 +65,9 @@ node tests/theme.test.js
 ## 项目结构
 
 ```
-card-lab/
+card-lab/                      ← 仓库根目录就是网站根目录，线上无需构建
 ├── index.html                单页应用
-├── server.mjs                零依赖本地服务器（根目录 + public/ 映射到网站根）
+├── server.mjs                零依赖本地服务器（映射规则与线上一致）
 ├── src/
 │   ├── main.js               装配层：控件事件 -> store -> 渲染 / 导出
 │   ├── store.js              单一状态源 + 订阅
@@ -84,16 +77,21 @@ card-lab/
 │   ├── filename.js           [纯] 导出文件名生成
 │   ├── render.js             卡片 DOM 渲染
 │   └── export.js             PNG 导出
-├── public/
-│   ├── styles/               设计令牌 + 4 套模板样式 + 应用样式
-│   ├── vendor/               锁定的导出库（见下）
-│   └── demo/                 演示素材
+├── styles/                   设计令牌 + 4 套模板样式 + 应用样式
+├── vendor/                   锁定的导出库（见下）
+├── demo/                     演示素材
 ├── tests/                    node:test 单元测试
 ├── scripts/                  维护脚本
-└── docs/superpowers/         规格与实施计划
+├── docs/superpowers/         规格与实施计划
+└── .github/workflows/        GitHub Pages 自动部署
 ```
 
-## 为什么把导出库放在 public/vendor
+> 为什么样式和 vendor 库放在仓库根目录而不是 `public/`：这个项目**没有构建步骤**，
+> GitHub Pages 直接发布仓库内容。放在 `public/` 里的话，线上地址会变成
+> `.../public/styles/app.css`，而本地 Vite 会把 `public/` 映射到网站根，两边不一致。
+> 现在根目录即网站根，本地和线上路径完全相同。
+
+## 为什么把导出库提交进仓库
 
 导出用 [modern-screenshot](https://github.com/qq15725/modern-screenshot)（MIT），但它**没有进 package.json**，而是把构建产物直接提交到仓库里：
 
@@ -103,7 +101,7 @@ card-lab/
 | | |
 |---|---|
 | 版本 | `4.7.0` |
-| 文件 | `public/vendor/modern-screenshot.umd.js` |
+| 文件 | `vendor/modern-screenshot.umd.js` |
 | 原始产物 sha256 | `bb36665889124a0b6e15f16045265737449c3bdcf2712cdb08af3cfa01563e2b` |
 
 想升级版本：`node scripts/vendor-modern-screenshot.mjs 4.8.0`，然后把上表的哈希一起改掉。
@@ -121,9 +119,9 @@ card-lab/
 
 ## 已知问题
 
-- **在受限沙箱里 `vite build` 可能失败**（`spawn EPERM`）：Vite 在 Windows 上会调 `exec('net use')` 判断网络盘，某些禁用了子进程管道调用的环境会拒绝。**这不是项目的问题**，线上部署不依赖 Vite，用 `node server.mjs` 本地预览即可。
 - **中文字体依赖系统字体。** 现在用的是 `Noto Sans SC / PingFang SC / Microsoft YaHei` 这条回退链，不同设备导出的字形会有细微差别。想做完全一致需要自托管字体文件，会明显增大仓库体积，暂不做。
 - **导出图里的颜色和屏幕上看可能有极小差异**，这是 canvas 光栅化与屏幕渲染的正常区别。
+- **超长文字目前只收紧排版，不做分页。** 想导出超长内容需要等 Roadmap 里的分页功能。
 
 ## Roadmap
 

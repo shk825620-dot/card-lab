@@ -1,19 +1,22 @@
 {
   "name": "card-lab",
-  "version": "0.1.0",
+  "version": "1.0.0",
   "private": true,
   "type": "module",
-  "description": "输入文字，实时生成好看的卡片，一键导出 PNG。纯前端、零后端。",
+  "description": "输入文字，实时生成好看的卡片，一键导出 PNG。纯前端、零后端、零依赖。",
   "license": "MIT",
   "author": "shk825620-dot",
-  "scripts": {
-    "dev": "vite",
-    "build": "vite build",
-    "preview": "vite preview",
-    "serve": "node server.mjs",
-    "test": "node tests/run-all.mjs"
+  "repository": {
+    "type": "git",
+    "url": "https://github.com/shk825620-dot/card-lab.git"
   },
-  "devDependencies": {
-    "vite": "^7.3.6"
+  "keywords": ["card", "poster", "canvas", "png", "frontend", "vanilla-js", "卡片"],
+  "engines": {
+    "node": ">=18"
+  },
+  "scripts": {
+    "start": "node server.mjs",
+    "dev": "node server.mjs",
+    "test": "node tests/run-all.mjs"
   }
 }
